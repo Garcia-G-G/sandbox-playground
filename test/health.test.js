@@ -39,14 +39,14 @@ test('POST /health returns 405 with an Allow header', async () => {
   assert.equal(res.status, 405);
   assert.equal(res.headers.get('allow'), 'GET, HEAD');
   assert.match(res.headers.get('content-type'), /application\/json/);
-  assert.equal(typeof (await res.json()).error, 'string');
+  assert.deepEqual(await res.json(), { error: 'Method Not Allowed' });
 });
 
 test('unknown path returns 404 with a JSON error body', async () => {
   const res = await fetch(`${baseUrl}/does-not-exist`);
   assert.equal(res.status, 404);
   assert.match(res.headers.get('content-type'), /application\/json/);
-  assert.equal(typeof (await res.json()).error, 'string');
+  assert.deepEqual(await res.json(), { error: 'Not Found' });
 });
 
 test('/health with a query string still matches', async () => {
