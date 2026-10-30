@@ -41,3 +41,5 @@ Content-Type: application/json; charset=utf-8
 
 {"status":"ok"}
 ```
+
+`GET /panel` returns the status panel as an HTML page (`text/html; charset=utf-8`).
