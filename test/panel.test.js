@@ -1,6 +1,5 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { once } from 'node:events';
 import { createServer } from '../src/app.js';
 
 let server;
@@ -8,15 +7,13 @@ let baseUrl;
 
 before(async () => {
   server = createServer();
-  server.listen(0, '127.0.0.1');
-  await once(server, 'listening');
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const { port } = server.address();
   baseUrl = `http://127.0.0.1:${port}`;
 });
 
 after(async () => {
-  server.close();
-  await once(server, 'close');
+  await new Promise((resolve) => server.close(resolve));
 });
 
 test('GET /panel returns a self-contained HTML page', async () => {
@@ -56,4 +53,16 @@ test('POST /panel returns 405 JSON with an Allow header', async () => {
   assert.equal(res.headers.get('allow'), 'GET, HEAD');
   assert.match(res.headers.get('content-type'), /application\/json/);
   assert.deepEqual(await res.json(), { error: 'Method Not Allowed' });
+});
+
+test('/panel references no absolute http(s) URLs', async () => {
+  const body = await (await fetch(`${baseUrl}/panel`)).text();
+  assert.doesNotMatch(body, /https?:\/\//i);
+  assert.doesNotMatch(body, /<(script|link|img|iframe)\b[^>]*\b(src|href)\s*=/i);
+});
+
+test('/panel with a query string still matches', async () => {
+  const res = await fetch(`${baseUrl}/panel?probe=1`);
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get('content-type'), 'text/html; charset=utf-8');
 });

@@ -1,6 +1,5 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { once } from 'node:events';
 import { createServer } from '../src/app.js';
 import { resolvePort } from '../src/server.js';
 
@@ -9,15 +8,13 @@ let baseUrl;
 
 before(async () => {
   server = createServer();
-  server.listen(0, '127.0.0.1');
-  await once(server, 'listening');
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const { port } = server.address();
   baseUrl = `http://127.0.0.1:${port}`;
 });
 
 after(async () => {
-  server.close();
-  await once(server, 'close');
+  await new Promise((resolve) => server.close(resolve));
 });
 
 test('GET /health returns 200 with JSON {status: "ok"}', async () => {
