@@ -55,9 +55,13 @@ test('/health with a query string still matches', async () => {
 });
 
 test('resolvePort uses a valid PORT and falls back to 3000 otherwise', () => {
+  assert.equal(resolvePort('1'), 1);
   assert.equal(resolvePort('8080'), 8080);
   assert.equal(resolvePort('65535'), 65535);
-  for (const bad of [undefined, '', '0', '-1', '65536', '3.5', 'abc']) {
+  for (const bad of [
+    undefined, '', '0', '-1', '65536', '3.5', 'abc',
+    '1e3', '0x50', ' 80', '80 ', '+80', '80.0', '080', '0b1010', '99999', 8080,
+  ]) {
     assert.equal(resolvePort(bad), 3000, `PORT=${bad}`);
   }
 });
