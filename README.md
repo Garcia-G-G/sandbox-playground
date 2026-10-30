@@ -41,3 +41,13 @@ Content-Type: application/json; charset=utf-8
 
 {"status":"ok"}
 ```
+
+`GET /panel` returns a self-contained HTML status page (`200`, `Content-Type: text/html; charset=utf-8`). Its CSS and JavaScript are inline and it loads no other assets. In the browser it calls `/health` and shows `ok` or an error in the `#status` element. If the script has not run yet, or JavaScript is disabled, the page shows fallback text instead.
+
+| Method on `/panel` | Response |
+| --- | --- |
+| `GET` | `200`, the HTML page |
+| `HEAD` | `200`, same headers, empty body |
+| Any other | `405`, JSON `{"error":"Method Not Allowed"}`, header `Allow: GET, HEAD` |
+
+Open `http://localhost:3000/panel` in a browser to view it.
